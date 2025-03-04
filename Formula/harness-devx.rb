@@ -13,9 +13,6 @@ class HarnessDevx < Formula
   depends_on "mutagen-io/mutagen/mutagen"
   depends_on "google-cloud-sdk"
 
-  # Recommended cask dependencies
-  depends_on cask: "intellij-idea-ce"
-
   def install
     # Create necessary directories
     system "mkdir", "-p", "#{ENV["HOME"]}/.devx"
@@ -61,18 +58,21 @@ class HarnessDevx < Formula
     ohai "Installation Complete!"
     ohai "Next Steps:"
     puts <<~EOS
-      1. Install IntelliJ Plugins:
+      1. Install IntelliJ IDEA Community Edition:
+         $ brew install --cask intellij-idea-ce
+
+      2. Install IntelliJ Plugins:
          - Open IntelliJ IDEA
          - Go to Settings/Preferences > Plugins
          - Install "Bazel" and "Lombok" plugins
 
-      2. Configure Google Cloud:
+      3. Configure Google Cloud:
          $ gcloud auth login
 
-      3. Start Colima (if not already running):
+      4. Start Colima (if not already running):
          $ colima start
 
-      4. Initialize the development environment:
+      5. Initialize the development environment:
          $ cd YOUR_HARNESS_CORE_DIRECTORY
          $ make init
 
