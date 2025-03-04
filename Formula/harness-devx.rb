@@ -14,7 +14,15 @@ class HarnessDevx < Formula
   depends_on "jq"
   depends_on "bazelisk"
   depends_on "mutagen-io/mutagen/mutagen"
-  depends_on "google-cloud-sdk"
+
+  # Recommend installing these casks separately
+  def cask_dependencies
+    <<~EOS
+      The following casks are required:
+      $ brew install --cask google-cloud-sdk
+      $ brew install --cask intellij-idea-ce
+    EOS
+  end
 
   def install
     # Create necessary directories
@@ -51,26 +59,24 @@ class HarnessDevx < Formula
   end
 
   def post_install
-    # Configure Google Cloud Docker authentication
-    system "gcloud", "auth", "configure-docker"
-    system "gcloud", "auth", "configure-docker", "us-west1-docker.pkg.dev"
-
-    # Set Docker context to Colima
-    system "docker", "context", "use", "colima"
-
     ohai "Installation Complete!"
+    ohai "Required Casks:"
+    puts cask_dependencies
     ohai "Next Steps:"
     puts <<~EOS
-      1. Install IntelliJ IDEA Community Edition:
+      1. Install Google Cloud SDK and configure:
+         $ brew install --cask google-cloud-sdk
+         $ gcloud auth login
+         $ gcloud auth configure-docker
+         $ gcloud auth configure-docker us-west1-docker.pkg.dev
+
+      2. Install IntelliJ IDEA Community Edition:
          $ brew install --cask intellij-idea-ce
 
-      2. Install IntelliJ Plugins:
+      3. Install IntelliJ Plugins:
          - Open IntelliJ IDEA
          - Go to Settings/Preferences > Plugins
          - Install "Bazel" and "Lombok" plugins
-
-      3. Configure Google Cloud:
-         $ gcloud auth login
 
       4. Start Colima (if not already running):
          $ colima start
@@ -116,6 +122,8 @@ class HarnessDevx < Formula
          - Currently set to use Colima
          - To check available contexts: docker context ls
          - To change context: docker context use <context-name>
+
+      #{cask_dependencies}
 
       If you encounter any issues, please refer to the documentation or contact Harness support.
     EOS
