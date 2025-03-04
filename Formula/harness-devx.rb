@@ -1,7 +1,10 @@
 class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
   homepage "https://harness.io"
+  url "https://github.com/harness/harness-core/archive/refs/tags/v1.0.0.tar.gz"
+  sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   version "1.0.0"
+  license "PolyForm Free Trial 1.0.0"
   
   # Required dependencies
   depends_on "openjdk@17"
