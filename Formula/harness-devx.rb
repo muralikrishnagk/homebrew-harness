@@ -56,8 +56,18 @@ class HarnessDevx < Formula
 
       # Install required casks
       echo "Installing required casks..."
-      brew install --cask google-cloud-sdk || true
-      brew install --cask intellij-idea-ce || true
+      if ! brew list --cask google-cloud-sdk &>/dev/null; then
+        brew install --cask google-cloud-sdk
+      fi
+      if ! brew list --cask intellij-idea-ce &>/dev/null; then
+        brew install --cask intellij-idea-ce
+      fi
+      if ! brew list --cask colima &>/dev/null; then
+        brew install --cask colima
+        # Set Docker context and start Colima
+       echo "Setting Docker context to Colima..."
+       docker context use colima
+fi
 
       # Install SDKMAN and Java
       echo "Installing SDKMAN and Java..."
@@ -75,16 +85,6 @@ class HarnessDevx < Formula
         gcloud auth configure-docker us-west1-docker.pkg.dev
       fi
 
-      # Start and configure Colima
-      echo "Starting Colima..."
-      if ! colima status &>/dev/null; then
-        colima start
-      fi
-
-      # Set Docker context
-      echo "Setting Docker context to Colima..."
-      docker context use colima
-
       # Clone Harness Core repository if not already cloned
       echo "Setting up Harness Core repository..."
       HARNESS_CORE_DIR="$HOME/harness-ws/harness-core"
@@ -92,9 +92,19 @@ class HarnessDevx < Formula
         mkdir -p "$HOME/harness-ws"
         cd "$HOME/harness-ws"
         git clone https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git
-        cd harness-core
-        make init
+        cd harness-core 
       fi
+
+    
+      # Start Colima using make command if context is colima, otherwise use direct command
+      echo "Starting Colima..."
+      if [ "$(docker context show)" = "colima" ]; then
+        cd "$HARNESS_CORE_DIR"
+        make start-colima
+      fi
+
+      # Initialize the harness-core local devx container
+      make init
 
       echo "Setup complete!"
       echo
@@ -124,7 +134,7 @@ class HarnessDevx < Formula
       - 100 GB Storage
 
       ## Usage
-      Run the setup script:
+      Run the setup script after enabling Admin By Request or as Root:
       ```bash
       harness-setup
       ```
