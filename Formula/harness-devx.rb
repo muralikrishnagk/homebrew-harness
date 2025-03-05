@@ -1,12 +1,9 @@
 class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
   homepage "https://harness.io"
-  url "https://raw.githubusercontent.com/harness/harness-core/main/README.md"
-  sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   version "1.0.0"
   license "PolyForm Free Trial 1.0.0"
 
-  # Required dependencies
   depends_on "openjdk@17"
   depends_on "colima"
   depends_on "docker"
@@ -79,18 +76,43 @@ class HarnessDevx < Formula
       echo "Setting Docker context to Colima..."
       docker context use colima
 
-      echo "Setup complete! Next steps:"
-      echo "1. Clone the Harness Core repository:"
-      echo "   git clone https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git"
-      echo "2. Open IntelliJ and install the Bazel and Lombok plugins"
-      echo "3. cd into harness-core and run: make init"
+      # Clone Harness Core repository
+      echo "Cloning Harness Core repository..."
+      cd "$HOME/harness-ws" || mkdir -p "$HOME/harness-ws"
+      git clone https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git
+      cd harness-core
+
+      # Initialize the development environment
+      echo "Initializing development environment..."
+      make init
+
+      echo "Setup complete!"
+      echo "Next steps:"
+      echo "1. Open IntelliJ IDEA"
+      echo "2. Install the Bazel and Lombok plugins"
+      echo "3. Import the harness-core project"
     EOS
 
     # Make the setup script executable
     chmod 0755, bin/"harness-setup"
 
-    # Install documentation
-    doc.install "README.md"
+    # Create a minimal README
+    (share/"harness-devx").mkpath
+    (share/"harness-devx/README.md").write <<~EOS
+      # Harness DevX Platform
+
+      This package sets up the Harness DevX development environment.
+      
+      ## Usage
+
+      Run the setup script:
+      ```bash
+      harness-setup
+      ```
+
+      For detailed documentation, visit:
+      https://harness.atlassian.net/wiki/spaces/BT/pages/22046113898/Local+DevX+Platform+README
+    EOS
   end
 
   def caveats
