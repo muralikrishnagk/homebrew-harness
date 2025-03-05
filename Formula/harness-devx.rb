@@ -66,14 +66,21 @@ class HarnessDevx < Formula
         brew install colima || true
       fi
 
-      # Set Docker context and start Colima if not already set
-      if ! docker context inspect colima &>/dev/null; then
-        echo "Creating Docker context for Colima..."
-        colima nerdctl install
-        docker context use colima || true
-      else
-        echo "Docker context 'colima' already exists"
+      # Stop Colima if running
+      if colima status &>/dev/null; then
+        echo "Stopping Colima..."
+        colima stop
       fi
+
+      # Start Colima fresh
+      echo "Starting Colima..."
+      colima start
+
+      # Set up Docker context
+      echo "Setting up Docker context..."
+      docker context rm colima &>/dev/null || true
+      colima nerdctl install
+      docker context use colima || true
 
       # Install SDKMAN and Java
       echo "Installing SDKMAN and Java..."
