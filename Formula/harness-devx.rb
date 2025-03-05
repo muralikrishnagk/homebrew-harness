@@ -1,9 +1,7 @@
 class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
   homepage "https://harness.io"
-  url "https://github.com/harness/harness-core/raw/main/README.md"
   version "1.0.0"
-  sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"  # SHA of empty file
   license "PolyForm Free Trial 1.0.0"
 
   # Core dependencies
@@ -14,10 +12,6 @@ class HarnessDevx < Formula
   depends_on "jq"
   depends_on "bazelisk"
   depends_on "mutagen-io/mutagen/mutagen"
-
-  # Required casks
-  depends_on cask: "google-cloud-sdk"
-  depends_on cask: "intellij-idea-ce"
 
   def install
     # Create necessary directories
@@ -57,6 +51,11 @@ class HarnessDevx < Formula
       set -e
 
       echo "Setting up Harness DevX environment..."
+
+      # Install required casks
+      echo "Installing required casks..."
+      brew install --cask google-cloud-sdk
+      brew install --cask intellij-idea-ce
 
       # Install SDKMAN and Java
       echo "Installing SDKMAN and Java..."
