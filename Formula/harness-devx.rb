@@ -62,12 +62,18 @@ class HarnessDevx < Formula
       if ! brew list --cask intellij-idea-ce &>/dev/null; then
         brew install --cask intellij-idea-ce || true
       fi
-      if ! brew list --cask colima &>/dev/null; then
-        brew install --cask colima || true
-        # Set Docker context and start Colima
-       echo "Setting Docker context to Colima..."
-       docker context use colima
-fi
+      if ! brew list colima &>/dev/null; then
+        brew install colima || true
+      fi
+
+      # Set Docker context and start Colima if not already set
+      if ! docker context inspect colima &>/dev/null; then
+        echo "Creating Docker context for Colima..."
+        colima nerdctl install
+        docker context use colima || true
+      else
+        echo "Docker context 'colima' already exists"
+      fi
 
       # Install SDKMAN and Java
       echo "Installing SDKMAN and Java..."
