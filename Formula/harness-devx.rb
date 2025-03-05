@@ -57,13 +57,13 @@ class HarnessDevx < Formula
       # Install required casks
       echo "Installing required casks..."
       if ! brew list --cask google-cloud-sdk &>/dev/null; then
-        brew install --cask google-cloud-sdk
+        brew install --cask google-cloud-sdk || true
       fi
       if ! brew list --cask intellij-idea-ce &>/dev/null; then
-        brew install --cask intellij-idea-ce
+        brew install --cask intellij-idea-ce || true
       fi
       if ! brew list --cask colima &>/dev/null; then
-        brew install --cask colima
+        brew install --cask colima || true
         # Set Docker context and start Colima
        echo "Setting Docker context to Colima..."
        docker context use colima
