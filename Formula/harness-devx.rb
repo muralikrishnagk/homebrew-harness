@@ -56,8 +56,8 @@ class HarnessDevx < Formula
 
       # Install required casks
       echo "Installing required casks..."
-      brew install --cask google-cloud-sdk
-      brew install --cask intellij-idea-ce
+      brew install --cask google-cloud-sdk || true
+      brew install --cask intellij-idea-ce || true
 
       # Install SDKMAN and Java
       echo "Installing SDKMAN and Java..."
