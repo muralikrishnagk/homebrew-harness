@@ -2,7 +2,7 @@ class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
   homepage "https://harness.io"
   url "https://github.com/muralikrishnagk/homebrew-harness/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "d617b7813e4ce6d50f57256fe2361bd72fb5c8fbef00e181ef1946c0882c5b16"
+  sha256 "dd3aae34d2b42500cdc4a0cb1b327a0113071fd128a42f4f77d45940b8c0084e"
   version "1.0.0"
   license "PolyForm Free Trial 1.0.0"
 
