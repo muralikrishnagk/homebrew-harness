@@ -1,10 +1,11 @@
 class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
-  homepage "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core"
-  url "https://raw.githubusercontent.com/harness/harness-core/main/README.md"
+  homepage "https://harness.io"
   version "1.0.0"
   license "PolyForm Free Trial 1.0.0"
+  head "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git"
 
+  # Core dependencies
   depends_on "openjdk@17"
   depends_on "colima"
   depends_on "docker"
@@ -12,6 +13,10 @@ class HarnessDevx < Formula
   depends_on "jq"
   depends_on "bazelisk"
   depends_on "mutagen-io/mutagen/mutagen"
+
+  # Required casks
+  depends_on cask: "google-cloud-sdk"
+  depends_on cask: "intellij-idea-ce"
 
   def install
     # Create necessary directories
@@ -54,44 +59,50 @@ class HarnessDevx < Formula
 
       # Install SDKMAN and Java
       echo "Installing SDKMAN and Java..."
-      curl -s "https://get.sdkman.io" | bash
-      source "$HOME/.sdkman/bin/sdkman-init.sh"
-      sdk install java 17.0.7-tem
-
-      # Install required casks
-      echo "Installing required casks..."
-      brew install --cask google-cloud-sdk
-      brew install --cask intellij-idea-ce
+      if [ ! -d "$HOME/.sdkman" ]; then
+        curl -s "https://get.sdkman.io" | bash
+        source "$HOME/.sdkman/bin/sdkman-init.sh"
+        sdk install java 17.0.7-tem
+      fi
 
       # Configure Google Cloud
       echo "Configuring Google Cloud..."
-      gcloud auth login
-      gcloud auth configure-docker
-      gcloud auth configure-docker us-west1-docker.pkg.dev
+      if ! gcloud auth print-access-token &>/dev/null; then
+        gcloud auth login
+        gcloud auth configure-docker
+        gcloud auth configure-docker us-west1-docker.pkg.dev
+      fi
 
       # Start and configure Colima
       echo "Starting Colima..."
-      colima start
+      if ! colima status &>/dev/null; then
+        colima start
+      fi
 
       # Set Docker context
       echo "Setting Docker context to Colima..."
       docker context use colima
 
-      # Clone Harness Core repository
-      echo "Cloning Harness Core repository..."
-      cd "$HOME/harness-ws" || mkdir -p "$HOME/harness-ws"
-      git clone https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git
-      cd harness-core
-
-      # Initialize the development environment
-      echo "Initializing development environment..."
-      make init
+      # Clone Harness Core repository if not already cloned
+      echo "Setting up Harness Core repository..."
+      HARNESS_CORE_DIR="$HOME/harness-ws/harness-core"
+      if [ ! -d "$HARNESS_CORE_DIR" ]; then
+        mkdir -p "$HOME/harness-ws"
+        cd "$HOME/harness-ws"
+        git clone https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git
+        cd harness-core
+        make init
+      fi
 
       echo "Setup complete!"
+      echo
       echo "Next steps:"
       echo "1. Open IntelliJ IDEA"
       echo "2. Install the Bazel and Lombok plugins"
       echo "3. Import the harness-core project"
+      echo
+      echo "For detailed documentation, visit:"
+      echo "https://harness.atlassian.net/wiki/spaces/BT/pages/22046113898/Local+DevX+Platform+README"
     EOS
 
     # Make the setup script executable
@@ -104,13 +115,34 @@ class HarnessDevx < Formula
 
       This package sets up the Harness DevX development environment.
       
-      ## Usage
+      ## System Requirements
+      - MacOS Sonoma 14.5 or higher
+      - Minimum 8 CPUs
+      - 20 GB RAM
+      - 100 GB Storage
 
+      ## Usage
       Run the setup script:
       ```bash
       harness-setup
       ```
 
+      ## Container Runtime Options
+      1. Colima (recommended, configured by default)
+         - Automatically configured with 8 CPU, 16GB RAM, 100GB disk
+         - ARM64 native support (no Rosetta emulation)
+
+      2. Docker Desktop
+         - Configure resources: 8 CPU, 20GB RAM, 100GB disk minimum
+         - Enable Rosetta emulation only for AMD images
+         - Set context: docker context use docker-desktop
+
+      3. Rancher Desktop
+         - Configure resources: 8 CPU, 20GB RAM, 100GB disk minimum
+         - Enable VZ and configure Rosetta as needed
+         - Set context: docker context use rancher-desktop
+
+      ## Documentation
       For detailed documentation, visit:
       https://harness.atlassian.net/wiki/spaces/BT/pages/22046113898/Local+DevX+Platform+README
     EOS
@@ -150,7 +182,8 @@ class HarnessDevx < Formula
   end
 
   test do
-    system "#{bin}/harness-setup", "--help"
+    assert_predicate bin/"harness-setup", :exist?
+    assert_predicate share/"harness-devx/README.md", :exist?
     system "colima", "version"
     system "docker", "--version"
     system "bazelisk", "version"
