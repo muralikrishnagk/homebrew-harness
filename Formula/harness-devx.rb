@@ -1,6 +1,7 @@
 class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
   homepage "https://harness.io"
+  head "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git"
   version "1.0.0"
   license "PolyForm Free Trial 1.0.0"
 
