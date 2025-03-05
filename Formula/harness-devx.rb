@@ -48,7 +48,7 @@ class HarnessDevx < Formula
     end
 
     # Create setup script
-    (bin/"harness-setup").write <<~EOS
+    setup_script = <<~EOS
       #!/bin/bash
       set -e
 
@@ -117,8 +117,13 @@ fi
       echo "https://harness.atlassian.net/wiki/spaces/BT/pages/22046113898/Local+DevX+Platform+README"
     EOS
 
-    # Make the setup script executable
-    FileUtils.chmod 0755, bin/"harness-setup"
+    # Write setup script to a temporary file
+    setup_script_path = buildpath/"harness-setup"
+    setup_script_path.write(setup_script)
+    setup_script_path.chmod(0755)
+
+    # Install the script
+    bin.install "harness-setup"
 
     # Create a minimal README
     (share/"harness-devx").mkpath
