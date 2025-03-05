@@ -118,8 +118,7 @@ fi
     EOS
 
     # Make the setup script executable
-    chmod 0755, bin/"harness-setup"
-    system "chmod", "+x", bin/"harness-setup"
+    FileUtils.chmod 0755, bin/"harness-setup"
 
     # Create a minimal README
     (share/"harness-devx").mkpath
