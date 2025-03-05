@@ -98,19 +98,32 @@ class HarnessDevx < Formula
         mkdir -p "$HOME/harness-ws"
         cd "$HOME/harness-ws"
         git clone https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git
-        cd harness-core 
       fi
 
-    
-      # Start Colima using make command if context is colima, otherwise use direct command
+      # Navigate to harness-core directory
+      cd "$HARNESS_CORE_DIR" || exit 1
+      
+      # Check if Makefile exists
+      if [ ! -f "Makefile" ]; then
+        echo "Error: Makefile not found in $HARNESS_CORE_DIR"
+        exit 1
+      fi
+
+      # Start Colima using make command if context is colima
       echo "Starting Colima..."
-      if [ "$(docker context show)" = "colima" ]; then
-        cd "$HARNESS_CORE_DIR"
+      if [ "$(docker context show)" = "colima" ] && grep -q "start-colima:" Makefile; then
         make start-colima
+      elif ! colima status &>/dev/null; then
+        colima start
       fi
 
-      # Initialize the harness-core local devx container
-      make init
+      # Initialize the harness-core local devx container if make init target exists
+      if grep -q "^init:" Makefile; then
+        echo "Initializing harness-core..."
+        make init
+      else
+        echo "Warning: 'make init' target not found in Makefile"
+      fi
 
       echo "Setup complete!"
       echo
