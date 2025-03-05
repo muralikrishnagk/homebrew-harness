@@ -1,8 +1,7 @@
 class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
-  homepage "https://harness.io"
-  url "file:///Users/muralikrishnag/harness-ws/homebrew-harness/src/harness-devx-1.0.0.tar.gz"
-  sha256 "5cb5868c6229862301c124984bd8651fa5dcffe604ce21029417f206e0df2288"
+  homepage "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core"
+  head "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git"
   version "1.0.0"
   license "PolyForm Free Trial 1.0.0"
   
@@ -14,15 +13,6 @@ class HarnessDevx < Formula
   depends_on "jq"
   depends_on "bazelisk"
   depends_on "mutagen-io/mutagen/mutagen"
-
-  # Recommend installing these casks separately
-  def cask_dependencies
-    <<~EOS
-      The following casks are required:
-      $ brew install --cask google-cloud-sdk
-      $ brew install --cask intellij-idea-ce
-    EOS
-  end
 
   def install
     # Create necessary directories
@@ -55,77 +45,73 @@ class HarnessDevx < Formula
       )
     end
 
-    prefix.install Dir["*"]
-  end
+    # Install the harness-core repository
+    system "git", "clone", "--depth", "1", "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core.git", "#{prefix}/harness-core"
 
-  def post_install
-    ohai "Installation Complete!"
-    ohai "Required Casks:"
-    puts cask_dependencies
-    ohai "Next Steps:"
-    puts <<~EOS
-      1. Install Google Cloud SDK and configure:
-         $ brew install --cask google-cloud-sdk
-         $ gcloud auth login
-         $ gcloud auth configure-docker
-         $ gcloud auth configure-docker us-west1-docker.pkg.dev
+    # Create setup script
+    (bin/"harness-setup").write <<~EOS
+      #!/bin/bash
+      set -e
 
-      2. Install IntelliJ IDEA Community Edition:
-         $ brew install --cask intellij-idea-ce
+      echo "Setting up Harness DevX environment..."
 
-      3. Install IntelliJ Plugins:
-         - Open IntelliJ IDEA
-         - Go to Settings/Preferences > Plugins
-         - Install "Bazel" and "Lombok" plugins
+      # Install required casks
+      brew install --cask google-cloud-sdk
+      brew install --cask intellij-idea-ce
 
-      4. Start Colima (if not already running):
-         $ colima start
+      # Configure Google Cloud
+      echo "Configuring Google Cloud..."
+      gcloud auth login
+      gcloud auth configure-docker
+      gcloud auth configure-docker us-west1-docker.pkg.dev
 
-      5. Initialize the development environment:
-         $ cd YOUR_HARNESS_CORE_DIRECTORY
-         $ make init
+      # Start Colima
+      echo "Starting Colima..."
+      colima start
 
-      System Requirements:
-      - Minimum 8 CPUs
-      - 20 GB RAM
-      - 100 GB Storage
+      # Initialize development environment
+      echo "Initializing development environment..."
+      cd #{prefix}/harness-core
+      make init
 
-      For detailed documentation, visit:
-      https://harness.atlassian.net/wiki/spaces/BT/pages/22046113898/Local+DevX+Platform+README
+      echo "Setup complete! Your Harness DevX environment is ready."
     EOS
-  end
 
-  test do
-    system "colima", "version"
-    system "docker", "--version"
-    system "bazelisk", "version"
-    system "java", "--version"
+    # Make the setup script executable
+    chmod 0755, bin/"harness-setup"
   end
 
   def caveats
     <<~EOS
       Important Notes:
-      1. This formula installs OpenJDK 17. If you prefer to use SDKman for Java management:
-         $ curl -s "https://get.sdkman.io" | bash
-         $ sdk install java 17.0.7-tem
+      1. To complete the setup, run:
+         $ harness-setup
 
-      2. For ARM-based Macs:
-         - Rosetta emulation is disabled by default
-         - This is the recommended setup for optimal performance
+      2. System Requirements:
+         - Minimum 8 CPUs
+         - 20 GB RAM
+         - 100 GB Storage
 
-      3. Container Runtime Options:
-         - This formula sets up Colima as the default container runtime
-         - You can also use Docker Desktop or Rancher Desktop
-         - Ensure your chosen runtime has sufficient resources allocated
+      3. Container Runtime:
+         - This setup uses Colima by default
+         - For Docker Desktop or Rancher Desktop, adjust settings accordingly
 
-      4. Docker Context:
-         - Currently set to use Colima
-         - To check available contexts: docker context ls
-         - To change context: docker context use <context-name>
+      4. Development Tools:
+         - IntelliJ IDEA will be installed
+         - Remember to install the Bazel and Lombok plugins
 
-      #{cask_dependencies}
+      5. For detailed documentation, visit:
+         https://harness.atlassian.net/wiki/spaces/BT/pages/22046113898/Local+DevX+Platform+README
 
-      If you encounter any issues, please refer to the documentation or contact Harness support.
+      If you encounter any issues, please contact Harness support.
     EOS
+  end
+
+  test do
+    system "#{bin}/harness-setup", "--help"
+    system "colima", "version"
+    system "docker", "--version"
+    system "bazelisk", "version"
+    system "java", "--version"
   end
 end
