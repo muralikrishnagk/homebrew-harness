@@ -124,6 +124,9 @@ fi
 
     # Install the script
     bin.install "harness-setup"
+    
+    # Ensure the script is executable
+    system "chmod", "+x", "#{bin}/harness-setup"
 
     # Create a minimal README
     (share/"harness-devx").mkpath
