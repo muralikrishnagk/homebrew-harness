@@ -122,11 +122,9 @@ fi
     setup_script_path.write(setup_script)
     setup_script_path.chmod(0755)
 
-    # Install the script
-    bin.install "harness-setup"
-    
-    # Ensure the script is executable
-    system "chmod", "+x", "#{bin}/harness-setup"
+    # Install to prefix and create symlink
+    prefix.install "harness-setup"
+    bin.install_symlink prefix/"harness-setup"
 
     # Create a minimal README
     (share/"harness-devx").mkpath
