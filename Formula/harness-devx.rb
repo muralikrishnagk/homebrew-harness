@@ -109,9 +109,9 @@ class HarnessDevx < Formula
         exit 1
       fi
 
-      # Start Colima using make command if context is colima
+      # Start Colima
       echo "Starting Colima..."
-      if [ "$(docker context show)" = "colima" ] && grep -q "start-colima:" Makefile; then
+      if grep -q "start-colima:" Makefile; then
         make start-colima
       elif ! colima status &>/dev/null; then
         colima start
