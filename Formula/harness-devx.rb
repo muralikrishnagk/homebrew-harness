@@ -1,9 +1,13 @@
 class HarnessDevx < Formula
   desc "Harness DevX Platform - Local Development Environment Setup"
   homepage "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core"
-  url "https://git.harness.io/vpCkHKsDSxK9_KYfjCTMKA/HarnessHCRInternalUAT/Harness_Code/harness-core/-/archive/main/harness-core-main.tar.gz"
   version "1.0.0"
   license "PolyForm Free Trial 1.0.0"
+
+  # This is a no-source formula
+  def self.init
+    true
+  end
 
   depends_on "openjdk@17"
   depends_on "colima"
