@@ -62,25 +62,6 @@ class HarnessDevx < Formula
       if ! brew list --cask intellij-idea-ce &>/dev/null; then
         brew install --cask intellij-idea-ce || true
       fi
-      if ! brew list colima &>/dev/null; then
-        brew install colima || true
-      fi
-
-      # Stop Colima if running
-      if colima status &>/dev/null; then
-        echo "Stopping Colima..."
-        colima stop
-      fi
-
-      # Start Colima fresh
-      echo "Starting Colima..."
-      colima start
-
-      # Set up Docker context
-      echo "Setting up Docker context..."
-      docker context rm colima &>/dev/null || true
-      colima nerdctl install
-      docker context use colima || true
 
       # Install SDKMAN and Java
       echo "Installing SDKMAN and Java..."
@@ -116,12 +97,28 @@ class HarnessDevx < Formula
         exit 1
       fi
 
-      # Start Colima
+      # Check if Colima is installed
+      if ! command -v colima &>/dev/null; then
+        echo "Error: Colima is not installed. Installing Colima now"
+        brew install colima || true
+      elif colima status &>/dev/null; then
+      # Stop Colima if running
+        echo "Stopping Colima..."
+        colima stop
+      fi
+
+      # Set up Docker context
+      echo "Setting up Docker context..."
+      docker context rm colima &>/dev/null || true
+      colima nerdctl install
+      docker context use colima || true
+
+      # Start Colima based on Makefile target
       echo "Starting Colima..."
       if grep -q "start-colima:" Makefile; then
         make start-colima
-      elif ! colima status &>/dev/null; then
-        colima start
+      else
+        colima start --cpu 8 --memory 16 --disk 100 --arch aarch64
       fi
 
       # Initialize the harness-core local devx container if make init target exists
